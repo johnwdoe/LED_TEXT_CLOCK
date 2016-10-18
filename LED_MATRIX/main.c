@@ -22,6 +22,7 @@
 
 #define CMD_PWR (0x04)
 #define CMD_TITLE (0x05)
+#define CMD_ZOOM (0x06)
 #define CMD_UP (0x09)
 #define CMD_DOWN (0x11)
 #define CMD_LEFT (0x0C)
