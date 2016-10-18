@@ -222,7 +222,7 @@ ISR(TIMER0_OVF_vect){
 	}
 
 	if (t0_extended_int & T0_OVF_F_8){
-		t0_extended_int &= !T0_OVF_F_8;
+		t0_extended_int &= ~T0_OVF_F_8;
 		if (mx_flags & F_MX_AUTOBRIGHT) ADCSRA |= (1<<ADEN | 1<<ADSC); //start conversion
 	}
 
