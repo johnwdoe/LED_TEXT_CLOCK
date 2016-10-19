@@ -238,6 +238,7 @@ int main(void){
 				break;
 			case CMD_PWR:
 				if(framesvmode++ == 3) framesvmode = 0;
+				flags |= F_RTC_MINCHANGED;
 				break;
 			case CMD_VOL_UP:
 				if(br > 250) break;
