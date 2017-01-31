@@ -237,17 +237,20 @@ int main(void){
 				flags |= F_RTC_MINCHANGED;
 				break;
 			case CMD_PWR:
-				if(framesvmode++ == 3) framesvmode = 0;
+				if(framesvmode++ == 4) framesvmode = 0;
 				flags |= F_RTC_MINCHANGED;
+				mxcontrol_draw(framesvmode);
 				break;
 			case CMD_VOL_UP:
 				if(br > 250) break;
 				br+=5;
+				mxcontrol_setbrightnessauto(0);
 				mxcontrol_setbrightness(br);
 				break;
 			case CMD_VOL_DOWN:
 				if(br < 5) break;
 				br-=5;
+				mxcontrol_setbrightnessauto(0);
 				mxcontrol_setbrightness(br);
 				break;
 			case CMD_PLAY:
@@ -255,6 +258,9 @@ int main(void){
 				break;
 			case CMD_STOP:
 				mxcontrol_blink(0);
+				break;
+			case CMD_DISP_ESC:
+				mxcontrol_setbrightnessauto(1);
 				break;
 			}
 		}

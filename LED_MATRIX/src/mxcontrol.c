@@ -9,6 +9,7 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 #include <avr/pgmspace.h>
+#include <stdlib.h>
 
 
 #define F_MX_BLINK (1)
@@ -16,6 +17,13 @@
 
 #define CUR_P_X ((printCoords>>4))
 #define CUR_P_Y ((printCoords&0x0F))
+
+#define RND_FILL_MODE_OFF	(0x00)
+#define RND_FILL_MODE_ON	(0x01)
+#define RND_FILL_MODE_VBUF	(0x02)
+
+/*internal prototypes*/
+void rndFillDisplay(uint8_t mode);
 
 uint8_t crow;
 uint8_t spibuf[3];
@@ -101,6 +109,9 @@ void mxcontrol_init(void){
 
 void mxcontrol_setbrightness(uint8_t b){
 	OCR1BL = b;
+	/*if (b<15){
+		OCR1BL = 15; //minimum brightness
+	}else if ()*/
 }
 
 void mxcontrol_setbrightnessauto(uint8_t b){
@@ -159,7 +170,44 @@ void mxcontrol_draw(uint8_t mode){
 				if (mode == 1) _delay_ms(10);
 			}
 		}
+	}else if (mode == 4){
+		rndFillDisplay(RND_FILL_MODE_ON); //turn off all pixels
+		rndFillDisplay(RND_FILL_MODE_VBUF); //fill with vbuff
+	}else if (mode == 5){
+		rndFillDisplay(RND_FILL_MODE_VBUF); //fill with vbuff only
+	}
+}
 
+void rndFillDisplay(uint8_t mode){
+	uint8_t map[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+			iter = 117,
+			x, y;
+	while(iter){
+		x = (uint8_t)rand();
+		if (x<117 && !(map[x>>3] & (0x80 >> (x & 0x07)))){
+			map[x>>3] |= (0x80 >> (x & 0x07)); //mark position as used
+			iter--;
+			//now we can use variable r
+			y = 0;
+			while(x >= 13) {
+				x -= 13;
+				y++;
+			}
+			//now we have x, y coords
+			switch(mode){
+			case RND_FILL_MODE_OFF:
+				vmem[y][x>>3] &= ~(0x80 >> (x & 0x07));
+				break;
+			case RND_FILL_MODE_ON:
+				vmem[y][x>>3] |= (0x80 >> (x& 0x07));
+				break;
+			case RND_FILL_MODE_VBUF:
+				vmem[y][x>>3] &= ~(0x80 >> (x & 0x07)); //turn off pix.
+				vmem[y][x>>3] |= vbuf[y][x>>3] & (0x80 >> (x & 0x07));
+				break;
+			}
+			_delay_ms(30);
+		}
 	}
 }
 
@@ -213,7 +261,7 @@ void mxcontrol_printchar (char c){
 
 
 ISR(TIMER0_OVF_vect){
-	t0_extended_int |= ((~t0_ovf_cnt) & (++t0_ovf_cnt)); //выставляем только те биты, что изменились с 0 на 1 в текущем такте. это и будет флагом прерывания
+	t0_extended_int = ((~t0_ovf_cnt) & (++t0_ovf_cnt)); //выставляем только те биты, что изменились с 0 на 1 в текущем такте. это и будет флагом прерывания
 
 	//int /256
 	if (t0_extended_int & T0_OVF_F_256){
@@ -266,9 +314,15 @@ ISR(SPI_STC_vect){
 
 ISR(ADC_vect){
 	//result in ADCH
-	if (ADCH > autobrValue){
+	uint8_t _adcFixed = ADCH;
+	if (_adcFixed <= MIN_AUTOBRIGHTNESS_TRESHOLD){
+		_adcFixed = MIN_AUTOBRIGHTNESS_TRESHOLD;
+	}else if (_adcFixed >= MAX_AUTOBRIGHTNESS_TRESHOLD){
+		_adcFixed = 0xFF;
+	}
+	if (_adcFixed > autobrValue){
 		autobrValue++;
-	}else if (ADCH < autobrValue){
+	}else if (_adcFixed < autobrValue){
 		autobrValue--;
 	}
 	mxcontrol_setbrightness(autobrValue);

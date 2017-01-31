@@ -27,6 +27,9 @@
 #define T0_OVF_F_128	(1<<6)
 #define T0_OVF_F_256	(1<<7)
 
+#define MIN_AUTOBRIGHTNESS_TRESHOLD	(15)
+#define MAX_AUTOBRIGHTNESS_TRESHOLD	(100)
+
 /*
  * инициализация дисплея (включая IO)
  */
