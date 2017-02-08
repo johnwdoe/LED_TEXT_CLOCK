@@ -237,7 +237,7 @@ int main(void){
 				flags |= F_RTC_MINCHANGED;
 				break;
 			case CMD_PWR:
-				if(framesvmode++ == 4) framesvmode = 0;
+				if(framesvmode++ == 5) framesvmode = 0;
 				flags |= F_RTC_MINCHANGED;
 				mxcontrol_draw(framesvmode);
 				break;
