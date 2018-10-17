@@ -175,6 +175,21 @@ void mxcontrol_draw(uint8_t mode){
 		rndFillDisplay(RND_FILL_MODE_VBUF); //fill with vbuff
 	}else if (mode == 5){
 		rndFillDisplay(RND_FILL_MODE_VBUF); //fill with vbuff only
+	}else if (mode == 6){
+		//shift frame up for 2 sec
+		for(i=0; i<9; i++)
+		{
+			//shift vmem for 1 row up
+			for(j=1; j<9; j++)
+			{
+				vmem[j-1][0]=vmem[j][0];
+				vmem[j-1][1]=vmem[j][1];
+			}
+			//copy top row from vbuf
+			vmem[8][0]=vbuf[i][0];
+			vmem[8][1]=vbuf[i][1];
+			_delay_ms(250);
+		}
 	}
 }
 
@@ -261,7 +276,7 @@ void mxcontrol_printchar (char c){
 
 
 ISR(TIMER0_OVF_vect){
-	t0_extended_int = ((~t0_ovf_cnt) & (++t0_ovf_cnt)); //выставляем только те биты, что изменились с 0 на 1 в текущем такте. это и будет флагом прерывания
+	t0_extended_int |= ((~t0_ovf_cnt) & (++t0_ovf_cnt)); //выставляем только те биты, что изменились с 0 на 1 в текущем такте. это и будет флагом прерывания
 
 	//int /256
 	if (t0_extended_int & T0_OVF_F_256){

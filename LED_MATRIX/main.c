@@ -64,7 +64,7 @@ const PROGMEM uint8_t mMap[] = {
 
 volatile uint8_t flags = 0;
 volatile uint8_t ir_cmd;
-uint8_t framesvmode = 0;
+uint8_t framesvmode = 4;
 uint8_t br = 0;
 uint8_t buf[] = { //initial state of RTC control registers
 		1<<RTC_12_24 | 1<<RTC_MI, //12 hours format, interrupt on minute change
@@ -237,8 +237,8 @@ int main(void){
 				flags |= F_RTC_MINCHANGED;
 				break;
 			case CMD_PWR:
-				if(framesvmode++ == 5) framesvmode = 0;
-				flags |= F_RTC_MINCHANGED;
+				if(framesvmode++ == 6) framesvmode = 0;
+				//flags |= F_RTC_MINCHANGED;
 				mxcontrol_draw(framesvmode);
 				break;
 			case CMD_VOL_UP:
@@ -261,6 +261,9 @@ int main(void){
 				break;
 			case CMD_DISP_ESC:
 				mxcontrol_setbrightnessauto(1);
+				break;
+			case CMD_SEL:
+				mxcontrol_draw(framesvmode);
 				break;
 			}
 		}
